@@ -1,8 +1,9 @@
 // index.js
 const express = require('express');
 const { createClient } = require('@supabase/supabase-js');
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-core');
 const marked = require('marked');
+const chromium = require('@sparticuz/chromium')
 require('dotenv').config();
 
 const app = express();
@@ -67,7 +68,14 @@ app.post('/generatePdf', async (req, res) => {
     }
 
     try {
-        const browser = await puppeteer.launch();
+        // const browser = await puppeteer.launch();
+        browser = await puppeteer.launch({
+            args: chromium.args,
+            defaultViewport: chromium.defaultViewport,
+            executablePath: await chromium.executablePath(),
+            headless: chromium.headless,
+            ignoreHTTPSErrors: true,
+        });
         const page = await browser.newPage();
         await page.setContent(html1, { waitUntil: 'load' });
 
