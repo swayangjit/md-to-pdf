@@ -26,6 +26,12 @@ app.post('/generatePdf', async (req, res) => {
 <head>
     <meta charset="UTF-8">
     <title>PDF Template</title>
+    <script src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
+<script>
+  window.onload = () => {
+    twemoji.parse(document.body);
+  };
+</script>
     <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet">
     <style>
     @page {
