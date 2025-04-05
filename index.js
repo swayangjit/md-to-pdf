@@ -26,6 +26,7 @@ app.post('/generatePdf', async (req, res) => {
 <head>
     <meta charset="UTF-8">
     <title>PDF Template</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet">
     <style>
     @page {
             size: A4;
@@ -35,7 +36,8 @@ app.post('/generatePdf', async (req, res) => {
             margin-right: 10mm;
         }
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.7;
             font-size: 12px;
             margin: 0;
             padding: 20px;
@@ -63,6 +65,8 @@ app.post('/generatePdf', async (req, res) => {
 </body>
 </html>
 `
+    console.log('html1', html1);
+
     if (!markdown) {
         return res.status(400).json({ error: 'MD content is required' });
     }
