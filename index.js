@@ -38,8 +38,7 @@ app.post('/generatePdf', async (req, res) => {
     body  {
         margin: 0;
         padding: 2rem;
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-        line-height: 1.7;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI Emoji', 'Segoe UI Symbol', 'Apple Color Emoji', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
         background-color: #ffffff;
         color: #333;
         font-size: 16px;
