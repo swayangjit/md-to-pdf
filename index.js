@@ -1,6 +1,6 @@
 const express = require('express');
 const { createClient } = require('@supabase/supabase-js');
-const puppeteer = require('puppeteer');
+const chromium = require('chrome-aws-lambda'); // ✅ serverless chromium
 const cors = require('cors');
 const markdownIt = require('markdown-it');
 require('dotenv').config();
@@ -89,9 +89,12 @@ app.post('/generatePdf', async (req, res) => {
     `;
 
     try {
-        const browser = await puppeteer.launch({
-            headless: 'new',
-            args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        // Launch puppeteer using chrome-aws-lambda
+        const browser = await chromium.puppeteer.launch({
+            args: chromium.args,
+            defaultViewport: chromium.defaultViewport,
+            executablePath: await chromium.executablePath,
+            headless: chromium.headless,
         });
 
         const page = await browser.newPage();
