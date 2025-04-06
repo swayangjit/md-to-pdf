@@ -3,7 +3,9 @@
     "@supabase/supabase-js": "^2.49.3",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "markdown-it": "^14.1.0",
     "marked": "^15.0.7",
-    "md-to-pdf": "^5.2.4"
+    "md-to-pdf": "^5.2.4",
+    "playwright": "^1.51.1"
   }
 }
