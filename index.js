@@ -80,6 +80,11 @@ app.post('/generatePdf', async (req, res) => {
 </body>
 </html>
 `
+    const headerHtml = `<p align="center">
+  <img src="https://tkhqppfqsitovjvsstfl.supabase.co/storage/v1/object/public/assets/netskillLogo.png" alt="Header Image" width="300" height="50"/>
+<hr style="border: none; height: .5px; background-color: #ccc; <br>" />
+
+`;
     console.log('Formatted HTML', html1);
     if (!markdown) {
         return res.status(400).json({ error: 'MD content is required' });
@@ -105,8 +110,8 @@ app.post('/generatePdf', async (req, res) => {
 
         // await browser.close();
 
-        const pdf = await mdToPdf({ content: markdown });
-        
+        const pdf = await mdToPdf({ content: headerHtml + markdown });
+
         // Upload to Supabase
         const bucketName = 'avatars';
         const fileName = `output-${Date.now()}.pdf`;
