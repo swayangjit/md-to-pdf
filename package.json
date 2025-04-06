@@ -1,13 +1,13 @@
 {
   "dependencies": {
     "@supabase/supabase-js": "^2.49.4",
-    "chrome-aws-lambda": "^10.1.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "markdown-it": "^14.1.0",
     "md-to-pdf": "^5.2.4",
-    "puppeteer": "^24.6.0"
+    "chrome-aws-lambda": "10.1.0",
+    "puppeteer-core": "10.1.0"
   },
   "scripts": {}
 }
