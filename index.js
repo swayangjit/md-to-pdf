@@ -1,8 +1,8 @@
 const express = require('express');
 const { createClient } = require('@supabase/supabase-js');
-const { mdToPdf } = require('md-to-pdf');
-const puppeteer = require('puppeteer'); // ✅ Replaced chrome-aws-lambda
+const puppeteer = require('puppeteer');
 const cors = require('cors');
+const markdownIt = require('markdown-it');
 require('dotenv').config();
 
 const app = express();
@@ -28,37 +28,86 @@ app.post('/generatePdf', async (req, res) => {
         return res.status(400).json({ error: 'Markdown content is required' });
     }
 
-    const headerMarkdown = `
-<p align="center">
-<img src="https://tkhqppfqsitovjvsstfl.supabase.co/storage/v1/object/public/assets/netskillLogo.png" alt="Header Image" width="300" height="50"/>
-</p>
+    // Markdown to HTML
+    const md = new markdownIt({ html: true, linkify: true, typographer: true });
+    const htmlContent = md.render(markdown);
 
----
+    // HTML Template with styling
+    const headerHTML = `
+        <div style="text-align: center; margin-bottom: 20px;">
+            <img src="https://tkhqppfqsitovjvsstfl.supabase.co/storage/v1/object/public/assets/netskillLogo.png" alt="Header Image" width="300" height="50" />
+        </div>
+        <hr/>
+    `;
 
-`;
+    const fullHtml = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Markdown PDF</title>
+        <style>
+            body {
+                font-family: 'Arial', sans-serif;
+                padding: 40px;
+                color: #333;
+                line-height: 1.6;
+                max-width: 800px;
+                margin: auto;
+            }
+            h1, h2, h3, h4 {
+                color: #222;
+            }
+            img {
+                max-width: 100%;
+            }
+            ul {
+                padding-left: 20px;
+            }
+            li {
+                margin-bottom: 5px;
+            }
+            hr {
+                border: none;
+                border-top: 2px solid #eee;
+                margin: 20px 0;
+            }
+            a {
+                color: #1a73e8;
+                text-decoration: none;
+            }
+            a:hover {
+                text-decoration: underline;
+            }
+        </style>
+    </head>
+    <body>
+        ${headerHTML}
+        ${htmlContent}
+    </body>
+    </html>
+    `;
 
     try {
         const browser = await puppeteer.launch({
-            headless: 'new', // ✅ New Puppeteer mode
-            args: ['--no-sandbox', '--disable-setuid-sandbox'], // ✅ Required for Vercel
+            headless: 'new',
+            args: ['--no-sandbox', '--disable-setuid-sandbox'],
         });
 
-        const pdf = await mdToPdf(
-            { content: headerMarkdown + markdown },
-            {
-                launchOptions: {
-                    executablePath: browser.executablePath(),
-                    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-                    headless: 'new',
-                },
-            }
-        );
+        const page = await browser.newPage();
+
+        await page.setContent(fullHtml, { waitUntil: 'networkidle0' });
+
+        const pdfBuffer = await page.pdf({
+            format: 'A4',
+            printBackground: true,
+            margin: {
+                top: '40px',
+                bottom: '40px',
+            },
+        });
 
         await browser.close();
-
-        if (!pdf || !pdf.content) {
-            throw new Error('PDF generation failed');
-        }
 
         // Upload to Supabase
         const bucketName = 'avatars';
@@ -66,7 +115,7 @@ app.post('/generatePdf', async (req, res) => {
 
         const { data, error } = await supabase.storage
             .from(bucketName)
-            .upload(fileName, pdf.content, {
+            .upload(fileName, pdfBuffer, {
                 cacheControl: '3600',
                 upsert: false,
                 contentType: 'application/pdf',
