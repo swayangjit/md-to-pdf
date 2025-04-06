@@ -4,6 +4,7 @@ const { createClient } = require('@supabase/supabase-js');
 const puppeteer = require('puppeteer-core');
 const marked = require('marked');
 const chromium = require('@sparticuz/chromium')
+const { mdToPdf } = require('md-to-pdf');
 require('dotenv').config();
 
 const app = express();
@@ -86,31 +87,33 @@ app.post('/generatePdf', async (req, res) => {
 
     try {
         // const browser = await puppeteer.launch();
-        browser = await puppeteer.launch({
-            args: chromium.args,
-            defaultViewport: chromium.defaultViewport,
-            executablePath: await chromium.executablePath(),
-            headless: chromium.headless,
-            ignoreHTTPSErrors: true,
-        });
-        const page = await browser.newPage();
-        await page.setContent(html1, { waitUntil: 'load' });
+        // browser = await puppeteer.launch({
+        //     args: chromium.args,
+        //     defaultViewport: chromium.defaultViewport,
+        //     executablePath: await chromium.executablePath(),
+        //     headless: chromium.headless,
+        //     ignoreHTTPSErrors: true,
+        // });
+        // const page = await browser.newPage();
+        // await page.setContent(html1, { waitUntil: 'load' });
 
-        const pdfBuffer = await page.pdf({
-            format: 'A4',
-            printBackground: true,
-            margin: { top: '10mm', bottom: '20mm', left: '1mm', right: '1mm' }
-        });
+        // const pdfBuffer = await page.pdf({
+        //     format: 'A4',
+        //     printBackground: true,
+        //     margin: { top: '10mm', bottom: '20mm', left: '1mm', right: '1mm' }
+        // });
 
-        await browser.close();
+        // await browser.close();
 
+        const pdf = await mdToPdf({ content: markdown });
+        
         // Upload to Supabase
         const bucketName = 'avatars';
         const fileName = `output-${Date.now()}.pdf`;
 
         const { data, error } = await supabase.storage
             .from(bucketName)
-            .upload(`${fileName}`, pdfBuffer, {
+            .upload(`${fileName}`, pdf.content, {
                 cacheControl: '3600',
                 upsert: false,
                 contentType: 'application/pdf',
