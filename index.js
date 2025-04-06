@@ -3,6 +3,7 @@ const { createClient } = require('@supabase/supabase-js');
 const chromium = require('chrome-aws-lambda'); // ✅ serverless chromium
 const cors = require('cors');
 const markdownIt = require('markdown-it');
+const puppeteer = require('puppeteer-core');
 require('dotenv').config();
 
 const app = express();
