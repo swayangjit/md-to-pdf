@@ -1,9 +1,9 @@
 // index.js
 const express = require('express');
 const { createClient } = require('@supabase/supabase-js');
-const puppeteer = require('puppeteer-core');
+// const puppeteer = require('puppeteer-core');
 const marked = require('marked');
-const chromium = require('@sparticuz/chromium')
+// const chromium = require('@sparticuz/chromium')
 const { mdToPdf } = require('md-to-pdf');
 require('dotenv').config();
 
