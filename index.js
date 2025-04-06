@@ -47,40 +47,54 @@ app.post('/generatePdf', async (req, res) => {
     <head>
         <meta charset="utf-8">
         <title>Markdown PDF</title>
-        <style>
-            body {
-                font-family: 'Arial', sans-serif;
-                padding: 40px;
-                color: #333;
-                line-height: 1.6;
-                max-width: 800px;
-                margin: auto;
-            }
-            h1, h2, h3, h4 {
-                color: #222;
-            }
-            img {
-                max-width: 100%;
-            }
-            ul {
-                padding-left: 20px;
-            }
-            li {
-                margin-bottom: 5px;
-            }
-            hr {
-                border: none;
-                border-top: 2px solid #eee;
-                margin: 20px 0;
-            }
-            a {
-                color: #1a73e8;
-                text-decoration: none;
-            }
-            a:hover {
-                text-decoration: underline;
-            }
-        </style>
+       <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans&family=Noto+Color+Emoji&display=swap');
+
+        body {
+            font-family: 'Noto Sans', 'Noto Color Emoji', sans-serif;
+            margin: 40px;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        h1, h2, h3 {
+            color: #111;
+        }
+
+        img {
+            max-width: 100%;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+
+        th, td {
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        p, li {
+            font-size: 14px;
+        }
+
+        hr {
+            margin: 20px 0;
+            border: none;
+            border-top: 1px solid #eee;
+        }
+
+        /* Ensure consistent margins across pages */
+        @page {
+            margin: 40px;
+        }
+    </style>
     </head>
     <body>
         ${headerHTML}
