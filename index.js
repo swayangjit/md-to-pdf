@@ -1,7 +1,7 @@
 const express = require('express');
 const { createClient } = require('@supabase/supabase-js');
 const { mdToPdf } = require('md-to-pdf');
-const chrome = require('chrome-aws-lambda');
+const puppeteer = require('puppeteer'); // ✅ Replaced chrome-aws-lambda
 const cors = require('cors');
 require('dotenv').config();
 
@@ -12,7 +12,7 @@ const port = process.env.PORT || 3003;
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
 // Middleware
-app.use(express.json({ limit: '10mb' })); // Support larger payloads if needed
+app.use(express.json({ limit: '10mb' }));
 app.use(cors());
 
 // Health Check
@@ -28,26 +28,33 @@ app.post('/generatePdf', async (req, res) => {
         return res.status(400).json({ error: 'Markdown content is required' });
     }
 
-    const headerHtml = `<div align="center">
-  <img src="https://tkhqppfqsitovjvsstfl.supabase.co/storage/v1/object/public/assets/netskillLogo.png" alt="Header Image" width="300" height="50"/>
-</div>
+    const headerMarkdown = `
+<p align="center">
+<img src="https://tkhqppfqsitovjvsstfl.supabase.co/storage/v1/object/public/assets/netskillLogo.png" alt="Header Image" width="300" height="50"/>
+</p>
 
 ---
+
 `;
-    const headerMd = `
-   ![Header Image](https://tkhqppfqsitovjvsstfl.supabase.co/storage/v1/object/public/assets/netskillLogo.png)`;
 
     try {
+        const browser = await puppeteer.launch({
+            headless: 'new', // ✅ New Puppeteer mode
+            args: ['--no-sandbox', '--disable-setuid-sandbox'], // ✅ Required for Vercel
+        });
+
         const pdf = await mdToPdf(
-            { content: headerHtml + markdown },
+            { content: headerMarkdown + markdown },
             {
                 launchOptions: {
-                    executablePath: await chrome.executablePath,
-                    args: chrome.args,
-                    headless: chrome.headless,
+                    executablePath: browser.executablePath(),
+                    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+                    headless: 'new',
                 },
             }
         );
+
+        await browser.close();
 
         if (!pdf || !pdf.content) {
             throw new Error('PDF generation failed');
