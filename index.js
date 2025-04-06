@@ -92,7 +92,12 @@ app.post('/generatePdf', async (req, res) => {
     try {
         // Launch puppeteer using chrome-aws-lambda
         const browser = await puppeteer.launch({
-            args: chromium.args,
+            args: [
+                ...chromium.args,
+                '--font-render-hinting=medium',
+                '--disable-skia-runtime-opts',
+                '--disable-font-subpixel-positioning',
+            ],
             defaultViewport: chromium.defaultViewport,
             executablePath: await chromium.executablePath(),
             headless: chromium.headless,
