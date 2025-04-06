@@ -1,63 +1,65 @@
 const express = require('express');
 const { createClient } = require('@supabase/supabase-js');
-const markdownIt = require('markdown-it');
-const playwright = require('playwright');
+const { mdToPdf } = require('md-to-pdf');
+const chrome = require('chrome-aws-lambda');
+const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 3003;
 
+// Supabase init
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
-app.use(express.json());
+// Middleware
+app.use(express.json({ limit: '10mb' })); // Support larger payloads if needed
+app.use(cors());
 
-async function generatePdf(markdownContent) {
-    const md = new markdownIt();
-    const headerHtml = `<p align="center">
-        <img src="https://tkhqppfqsitovjvsstfl.supabase.co/storage/v1/object/public/assets/netskillLogo.png" alt="Header Image" width="300" height="50"/>
-        <hr style="border: none; height: .5px; background-color: #ccc;" />
-    </p>`;
+// Health Check
+app.get('/', (req, res) => {
+    res.send('✅ Markdown to PDF Converter API is running.');
+});
 
-    const fullHtml = `
-        <html>
-            <head>
-                <style>
-                    body { font-family: Arial, sans-serif; margin: 20px; }
-                    img { margin-bottom: 20px; }
-                </style>
-            </head>
-            <body>
-                ${headerHtml}
-                ${md.render(markdownContent)}
-            </body>
-        </html>
-    `;
-
-    const browser = await playwright.chromium.launch();
-    const page = await browser.newPage();
-    await page.setContent(fullHtml, { waitUntil: 'domcontentloaded' });
-
-    const pdfBuffer = await page.pdf({ format: 'A4' });
-    await browser.close();
-
-    return pdfBuffer;
-}
-
-app.post(['/generatePdf', '/convert'], async (req, res) => {
+// Main Route
+app.post('/generatePdf', async (req, res) => {
     const { markdown } = req.body;
 
     if (!markdown) {
-        return res.status(400).json({ error: 'MD content is required' });
+        return res.status(400).json({ error: 'Markdown content is required' });
     }
 
+    const headerHtml = `<div align="center">
+  <img src="https://tkhqppfqsitovjvsstfl.supabase.co/storage/v1/object/public/assets/netskillLogo.png" alt="Header Image" width="300" height="50"/>
+</div>
+
+---
+`;
+    const headerMd = `
+   ![Header Image](https://tkhqppfqsitovjvsstfl.supabase.co/storage/v1/object/public/assets/netskillLogo.png)`;
+
     try {
-        const pdfBuffer = await generatePdf(markdown);
+        const pdf = await mdToPdf(
+            { content: headerHtml + markdown },
+            {
+                launchOptions: {
+                    executablePath: await chrome.executablePath,
+                    args: chrome.args,
+                    headless: chrome.headless,
+                },
+            }
+        );
+
+        if (!pdf || !pdf.content) {
+            throw new Error('PDF generation failed');
+        }
+
+        // Upload to Supabase
         const bucketName = 'avatars';
         const fileName = `output-${Date.now()}.pdf`;
 
         const { data, error } = await supabase.storage
             .from(bucketName)
-            .upload(fileName, pdfBuffer, {
+            .upload(fileName, pdf.content, {
                 cacheControl: '3600',
                 upsert: false,
                 contentType: 'application/pdf',
@@ -65,22 +67,21 @@ app.post(['/generatePdf', '/convert'], async (req, res) => {
 
         if (error) throw error;
 
-        const { data: publicUrlData } = supabase.storage.from(bucketName).getPublicUrl(fileName);
+        const { data: publicUrlData } = supabase.storage
+            .from(bucketName)
+            .getPublicUrl(fileName);
 
         res.status(200).json({
-            message: 'PDF uploaded successfully',
+            message: '✅ PDF uploaded successfully',
             url: publicUrlData.publicUrl,
         });
     } catch (error) {
         console.error('Error generating PDF:', error);
-        res.status(500).json({ error: 'Failed to generate PDF' });
+        res.status(500).json({ error: error.message || 'Failed to generate PDF' });
     }
 });
 
-app.get('/', (req, res) => {
-    res.send('Markdown to PDF Converter API');
-});
-
+// Start server
 app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+    console.log(`🚀 Server running on port ${port}`);
 });
