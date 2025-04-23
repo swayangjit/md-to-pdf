@@ -23,8 +23,8 @@ app.get('/', (req, res) => {
 
 // Main Route
 app.post('/generatePdf', async (req, res) => {
-    const { markdown } = req.body;
-
+    const { markdown, logo } = req.body;
+    logo = logo || "https://tkhqppfqsitovjvsstfl.supabase.co/storage/v1/object/public/assets/netskillLogo.png";
     if (!markdown) {
         return res.status(400).json({ error: 'Markdown content is required' });
     }
@@ -36,7 +36,7 @@ app.post('/generatePdf', async (req, res) => {
     // HTML Template with styling
     const headerHTML = `
         <div style="text-align: center; margin-bottom: 20px;">
-            <img src="https://tkhqppfqsitovjvsstfl.supabase.co/storage/v1/object/public/assets/netskillLogo.png" alt="Header Image" width="300" height="50" />
+            <img src=${logo} alt="Header Image" width="300" height="50" />
         </div>
         <hr/>
     `;
