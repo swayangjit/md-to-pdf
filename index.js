@@ -35,7 +35,7 @@ app.post('/generatePdf', async (req, res) => {
     // HTML Template with styling
     const headerHTML = `
         <div style="text-align: center; margin-bottom: 20px;">
-            <img src=${logo} alt="Header Image" width="300" height="50" />
+            <img src=${logo} alt="Header Image" width="300" height="60" />
         </div>
         <hr/>
     `;
