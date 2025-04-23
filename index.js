@@ -23,8 +23,7 @@ app.get('/', (req, res) => {
 
 // Main Route
 app.post('/generatePdf', async (req, res) => {
-    const { markdown, logo } = req.body;
-    logo = logo || "https://tkhqppfqsitovjvsstfl.supabase.co/storage/v1/object/public/assets/netskillLogo.png";
+    const { markdown, logo = "https://tkhqppfqsitovjvsstfl.supabase.co/storage/v1/object/public/assets/netskillLogo.png" } = req.body;
     if (!markdown) {
         return res.status(400).json({ error: 'Markdown content is required' });
     }
