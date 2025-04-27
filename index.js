@@ -6,7 +6,6 @@ const markdownIt = require('markdown-it');
 const puppeteer = require('puppeteer-core');
 const chromium = require('@sparticuz/chromium')
 const axios = require('axios');
-const { PDFDocument } = require('pdf-lib');
 const PDFMerger = require('pdf-merger-js');
 
 require('dotenv').config();
