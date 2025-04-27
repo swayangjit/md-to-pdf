@@ -387,15 +387,15 @@ app.post('/generateAndMergePdfParts', async (req, res) => {
 
     try {
         const browser = await puppeteer.launch({
-            headless: true,
-            landscape: true,
             args: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
+                ...chromium.args,
                 '--font-render-hinting=medium',
                 '--disable-skia-runtime-opts',
                 '--disable-font-subpixel-positioning',
             ],
+            defaultViewport: chromium.defaultViewport,
+            executablePath: await chromium.executablePath(),
+            headless: chromium.headless,
             ignoreHTTPSErrors: true,
         });
 
